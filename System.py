@@ -1,12 +1,9 @@
 import customtkinter
-import customtkinter as ctk
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 import random
 import sqlite3
-
-#from projeto01 import cancelar_entrada
 
 # Definição de variáveis
 x = 0
@@ -120,8 +117,7 @@ def produtos_dados_saida():
     for item in items:
         box = customtkinter.CTkCheckBox(scrollable_frame_saida, text=item, onvalue=item, offvalue="",
                                         variable=check_var,
-                                        command=lambda: ler_dados_produto_selecionado(check_var, scrollable_frame_saida)
-                                        if check_var.get() else apagar_entradas_produto_desmarcado(scrollable_frame_saida))
+                                        command=lambda: ler_dados_produto_selecionado(check_var, scrollable_frame_saida) if check_var.get() else apagar_entradas_produto_desmarcado(scrollable_frame_saida))
         box.pack(pady=0, padx=10, fill="x")
 
 
@@ -155,8 +151,6 @@ def apagar_entradas_produto_desmarcado(arg_frame):
     else:
         pass
 
-
-
 def excluir_dados_produto_selecionado(bessa):
     conexao = sqlite3.connect("dados.db")
     terminal_sql = conexao.cursor()
@@ -167,8 +161,6 @@ def excluir_dados_produto_selecionado(bessa):
     entrada_editar_preco.delete(0, "end")
     caixa_editar_texto.delete(0.0, "end")
     produtos_dados()
-
-
 
 def atualizar_dados_produto_selecionado():
     conexao = sqlite3.connect("dados.db")
@@ -181,15 +173,14 @@ def atualizar_dados_produto_selecionado():
     caixa_editar_texto.delete(0.0, "end")
     produtos_dados()
 
-
 def cancelar_dados_produto_selecionado():
     entrada_cadastrar_nome_produto.delete(0, tk.END)
     entrada_cadastrar_preco.delete(0, tk.END)
     caixa_texto_cadastrar_descricao.delete('1.0', tk.END)
     produtos_dados()
 
-
-# função abrirdef abrir_frame_cadastrar():
+# função abrir
+def abrir_frame_cadastrar():
     # fecha frame
     frame_editar.grid_forget()
     frame_saida.grid_forget()
@@ -466,13 +457,14 @@ caixa_editar_texto.grid(row=4, column=1, padx=10, pady=5, sticky="w", columnspan
 entrada_editar_buscar_produto = customtkinter.CTkEntry(frame_editar, width=220, placeholder_text="Buscar Produto")
 entrada_editar_buscar_produto.grid(row=1, column=0, padx=10, pady=5, sticky="w", columnspan=4)
 
-botao_editar_excluir = customtkinter.CTkButton(frame_editar, text="🗑️Excluir", width=85, fg_color="Red", hover_color="#2f394a", command=lambda : excluir_dados_produto_selecionado(entrada_editar_nome_produto.get()))
+botao_editar_excluir = customtkinter.CTkButton(frame_editar, text="🗑️Excluir", width=85, fg_color="Red",
+                                               hover_color="#2f394a", command=lambda : excluir_dados_produto_selecionado(entrada_editar_nome_produto.get()))
 botao_editar_excluir.grid(row=5, column=1, padx=10, pady=10, sticky="w")
 
-botao_editar_cancelar = customtkinter.CTkButton(frame_editar, text="❌Cancelar", width=80, command=lambda: cancelar_dados_produto_selecionado())
+botao_editar_cancelar = customtkinter.CTkButton(frame_editar, text="❌Cancelar", width=80, command=lambda : cancelar_dados_produto_selecionado())
 botao_editar_cancelar.grid(row=5, column=2, padx=10, pady=10)
 
-botao_editar_salvar = customtkinter.CTkButton(frame_editar, text="✔Salvar", width=80, command=lambda: atualizar_dados_produto_selecionado(check_var.get()))
+botao_editar_salvar = customtkinter.CTkButton(frame_editar, text="✔Salvar", width=80)
 botao_editar_salvar.grid(row=5, column=3, padx=10, pady=10, sticky="e")
 
 # widget frame_saida
@@ -508,14 +500,14 @@ entrada_nome_qtde.grid(row=1, column=1, padx=10, pady=20, columnspan=2)
 entrada_nome_buscar = customtkinter.CTkEntry(frame_saida, width=220, placeholder_text="Buscar")
 entrada_nome_buscar.grid(row=1, column=0, padx=10, sticky="w", columnspan=2)
 
-botao_cancelar_entrada = customtkinter.CTkButton(frame_saida, text="❌Cancelar", fg_color="Red", width=80)
-botao_cancelar_entrada.grid(row=5, column=1, padx=10, pady=10, stick="w")
+botao_cancelar = customtkinter.CTkButton(frame_saida, text="❌Cancelar", fg_color="Red", width=80)
+botao_cancelar.grid(row=5, column=1, padx=10, pady=10, stick="w")
 
-botao_salvar_entrada = customtkinter.CTkButton(frame_saida, text="☑Salvar", width=80)
-botao_salvar_entrada.grid(row=5, column=2, padx=10, pady=10, columnspan=2, sticky="e")
+botao_salvar = customtkinter.CTkButton(frame_saida, text="☑Salvar", width=80)
+botao_salvar.grid(row=5, column=2, padx=10, pady=10, columnspan=2, sticky="e")
 
-botao_adicionar_item_entrada = customtkinter.CTkButton(frame_saida, text="➕Adicionar item", width=120)
-botao_adicionar_item_entrada.grid(row=2, column=1, padx=10, pady=0, columnspan=2, sticky="e")
+botao_adicionar_item = customtkinter.CTkButton(frame_saida, text="➕Adicionar item", width=120)
+botao_adicionar_item.grid(row=2, column=1, padx=10, pady=0, columnspan=2, sticky="e")
 
 # widget frame_entrada
 
