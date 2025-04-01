@@ -61,6 +61,7 @@ def ler_dados():
     for item in tree_estoque.get_children():
         tree_estoque.delete(item)
 
+
     for j in recebe_dados:
         nome = str(j[0])
         quantidade = 0
