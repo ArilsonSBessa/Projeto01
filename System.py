@@ -49,8 +49,9 @@ def salvar_dados():
     limpar_campos_cadastro()
 
 
-criar_banco()
 
+criar_banco()
+''''''
 
 def ler_dados():
     conexao = sqlite3.connect("dados.db")
