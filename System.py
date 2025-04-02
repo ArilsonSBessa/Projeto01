@@ -9,6 +9,8 @@ import sqlite3
 x = 0
 y = 0
 
+#definição do git
+
 # importando a tabela
 
 aleatorio = []
