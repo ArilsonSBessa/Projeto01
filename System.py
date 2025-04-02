@@ -32,7 +32,7 @@ def criar_banco():
     conexao.commit()
     conexao.close()
 #dfgdfgf
-
+#cghghgh
 def limpar_campos_cadastro():
     entrada_cadastrar_nome_produto.delete(0, tk.END)
     entrada_cadastrar_preco.delete(0, tk.END)
