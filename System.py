@@ -31,7 +31,7 @@ def criar_banco():
     terminal_sql.execute("CREATE TABLE IF NOT EXISTS itens (nome text, preco decimal, descricao text)")
     conexao.commit()
     conexao.close()
-
+#dfgdfgf
 
 def limpar_campos_cadastro():
     entrada_cadastrar_nome_produto.delete(0, tk.END)
