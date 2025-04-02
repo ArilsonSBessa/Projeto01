@@ -5,6 +5,8 @@ from tkinter.messagebox import showinfo
 import random
 import sqlite3
 
+###
+
 # Definição de variáveis
 x = 0
 y = 0
