@@ -61,6 +61,7 @@ def ler_dados():
     for item in tree_estoque.get_children():
         tree_estoque.delete(item)
 
+
     for j in recebe_dados:
         nome = str(j[0])
         quantidade = 0
@@ -163,10 +164,10 @@ def excluir_dados_produto_selecionado(bessa):
     caixa_editar_texto.delete(0.0, "end")
     produtos_dados()
 
-def atualizar_dados_produto_selecionado():
+def atualizar_dados_produto_selecionado(a):
     conexao = sqlite3.connect("dados.db")
     terminal_sql = conexao.cursor()
-    terminal_sql.execute(f"UPDATE itens SET nome = '{entrada_editar_nome_produto.get()}', preco = '{entrada_editar_preco.get()}', descricao = '{caixa_editar_texto.get(0.0, 'end')}' WHERE nome = '{check_var}'")
+    terminal_sql.execute(f"UPDATE itens SET nome = '{entrada_editar_nome_produto.get()}', preco = '{entrada_editar_preco.get()}', descricao = '{caixa_editar_texto.get(0.0, 'end')}' WHERE nome = '{a}'")
     conexao.commit()
     conexao.close()
     entrada_editar_nome_produto.delete(0, "end")
@@ -465,7 +466,7 @@ botao_editar_excluir.grid(row=5, column=1, padx=10, pady=10, sticky="w")
 botao_editar_cancelar = customtkinter.CTkButton(frame_editar, text="❌Cancelar", width=80, command=lambda : apagar_entradas_produto_desmarcado(scrollable_frame_editar))
 botao_editar_cancelar.grid(row=5, column=2, padx=10, pady=10)
 
-botao_editar_salvar = customtkinter.CTkButton(frame_editar, text="✔Salvar", width=80)
+botao_editar_salvar = customtkinter.CTkButton(frame_editar, text="✔Salvar", width=80, command=lambda : atualizar_dados_produto_selecionado(check_var.get()))
 botao_editar_salvar.grid(row=5, column=3, padx=10, pady=10, sticky="e")
 
 # widget frame_saida
