@@ -9,7 +9,7 @@ import sqlite3
 x = 0
 y = 0
 
-#definição do git
+
 
 # importando a tabela
 
@@ -88,6 +88,7 @@ def produtos_dados():
                                         command=lambda: ler_dados_produto_selecionado(check_var, scrollable_frame_editar) if check_var.get() else apagar_entradas_produto_desmarcado(scrollable_frame_editar))
         box.pack(pady=5, padx=10, fill="x")
 
+
 def produtos_dados_entrada():
     conexao = sqlite3.connect("dados.db")
     terminal_sql = conexao.cursor()
@@ -141,42 +142,17 @@ def ler_dados_produto_selecionado(arg_item, arg_frame):
         pass
 
 
-#fim config botão cancelar
-
 def apagar_entradas_produto_desmarcado(arg_frame):
     if arg_frame == scrollable_frame_editar:
-        entrada_editar_nome_produto.delete(0,tk.END)
-        entrada_editar_preco.delete(0, tk.END)
-        caixa_editar_texto.delete("1.0", tk.END)
-
-        #Desmarca o checkbox
-        for wigets_edit in scrollable_frame_editar.winfo_children():
-            if isinstance(wigets_edit, customtkinter.CTkCheckBox):
-                wigets_edit.deselect()
-
+        entrada_editar_nome_produto.delete(0,"end")
+        entrada_editar_preco.delete(0, "end")
+        caixa_editar_texto.delete(0.0, "end")
     elif arg_frame == scrollable_frame_entrada:
-        entrada_nome_quantidade.delete(0, tk.END)
-        entrada_qtde_adicionada.delete(0, tk.END)
-        for wigets_edit in scrollable_frame_entrada.winfo_children():
-            if isinstance(wigets_edit, customtkinter.CTkCheckBox):
-                wigets_edit.deselect()
-
+        entrada_nome_quantidade.delete(0, "end")
     elif arg_frame == scrollable_frame_saida:
-        entrada_qtde_retirada.delete(0, tk.END)
-        entrada_nome_qtde.delete(0, tk.END)
-        for wigets_edit in scrollable_frame_saida.winfo_children():
-            if isinstance(wigets_edit, customtkinter.CTkCheckBox):
-                wigets_edit.deselect()
-
-    elif arg_frame == frame_cadastrar:
-        entrada_cadastrar_preco.delete(0, tk.END)
-        entrada_cadastrar_nome_produto.delete(0, tk.END)
-        caixa_texto_cadastrar_descricao.delete("1.0", tk.END)
-
-
+        entrada_nome_qtde.delete(0, "end")
     else:
         pass
-
 
 def excluir_dados_produto_selecionado(bessa):
     conexao = sqlite3.connect("dados.db")
@@ -190,11 +166,9 @@ def excluir_dados_produto_selecionado(bessa):
     produtos_dados()
 
 def atualizar_dados_produto_selecionado():
-    produto_selecionado = check_var.get().strip("(',)")
-    print(produto_selecionado)
     conexao = sqlite3.connect("dados.db")
     terminal_sql = conexao.cursor()
-    terminal_sql.execute(f"UPDATE itens SET nome = '{entrada_editar_nome_produto.get()}', preco = '{entrada_editar_preco.get()}', descricao = '{caixa_editar_texto.get(0.0, 'end')}' WHERE nome = '{produto_selecionado}'")
+    terminal_sql.execute(f"UPDATE itens SET nome = '{entrada_editar_nome_produto.get()}', preco = '{entrada_editar_preco.get()}', descricao = '{caixa_editar_texto.get(0.0, 'end')}' WHERE nome = '{check_var}'")
     conexao.commit()
     conexao.close()
     entrada_editar_nome_produto.delete(0, "end")
@@ -462,10 +436,6 @@ entrada_cadastrar_preco.grid(row=2, column=1, pady=5, padx=10, sticky="w")
 caixa_texto_cadastrar_descricao = customtkinter.CTkTextbox(frame_cadastrar, width=300, height=80)
 caixa_texto_cadastrar_descricao.grid(row=3, column=1, padx=10, sticky="w")
 
-botao_cadastrar_cancelar = customtkinter.CTkButton(frame_cadastrar, text="❌Cancelar", width=80, command=lambda : apagar_entradas_produto_desmarcado(frame_cadastrar))
-botao_cadastrar_cancelar.grid(row=4, column=1, padx=10, pady=10, sticky="w")
-
-
 botao_cadastrar_salvar = customtkinter.CTkButton(frame_cadastrar, text="✔Salvar", width=80, command=salvar_dados)
 botao_cadastrar_salvar.grid(row=4, column=1, padx=10, pady=10, sticky="e")
 
@@ -497,7 +467,7 @@ botao_editar_excluir.grid(row=5, column=1, padx=10, pady=10, sticky="w")
 botao_editar_cancelar = customtkinter.CTkButton(frame_editar, text="❌Cancelar", width=80, command=lambda : apagar_entradas_produto_desmarcado(scrollable_frame_editar))
 botao_editar_cancelar.grid(row=5, column=2, padx=10, pady=10)
 
-botao_editar_salvar = customtkinter.CTkButton(frame_editar, text="✔Salvar", width=80, command=lambda : atualizar_dados_produto_selecionado())
+botao_editar_salvar = customtkinter.CTkButton(frame_editar, text="✔Salvar", width=80)
 botao_editar_salvar.grid(row=5, column=3, padx=10, pady=10, sticky="e")
 
 # widget frame_saida
@@ -533,7 +503,7 @@ entrada_nome_qtde.grid(row=1, column=1, padx=10, pady=20, columnspan=2)
 entrada_nome_buscar = customtkinter.CTkEntry(frame_saida, width=220, placeholder_text="Buscar")
 entrada_nome_buscar.grid(row=1, column=0, padx=10, sticky="w", columnspan=2)
 
-botao_cancelar = customtkinter.CTkButton(frame_saida, text="❌Cancelar", fg_color="Red", width=80, command=lambda : apagar_entradas_produto_desmarcado(scrollable_frame_saida))
+botao_cancelar = customtkinter.CTkButton(frame_saida, text="❌Cancelar", fg_color="Red", width=80)
 botao_cancelar.grid(row=5, column=1, padx=10, pady=10, stick="w")
 
 botao_salvar = customtkinter.CTkButton(frame_saida, text="☑Salvar", width=80)
@@ -576,7 +546,7 @@ entrada_nome_quantidade.grid(row=1, column=1, padx=10, pady=20, columnspan=2)
 entrada_buscar = customtkinter.CTkEntry(frame_entrada, width=220, placeholder_text="Buscar")
 entrada_buscar.grid(row=1, column=0, padx=10, sticky="w", columnspan=2)
 
-botao_cancelar_entrada = customtkinter.CTkButton(frame_entrada, text="❌Cancelar", fg_color="Red", width=80, command=lambda : apagar_entradas_produto_desmarcado(scrollable_frame_entrada))
+botao_cancelar_entrada = customtkinter.CTkButton(frame_entrada, text="❌Cancelar", fg_color="Red", width=80)
 botao_cancelar_entrada.grid(row=5, column=1, padx=10, pady=10, stick="w")
 
 botao_salvar_entrada = customtkinter.CTkButton(frame_entrada, text="☑Salvar", width=80)
