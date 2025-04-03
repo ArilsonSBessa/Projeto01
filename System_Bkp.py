@@ -9,6 +9,8 @@ import sqlite3
 x = 0
 y = 0
 
+#definição do git
+
 # importando a tabela
 
 aleatorio = []
@@ -49,6 +51,7 @@ def salvar_dados():
     limpar_campos_cadastro()
 
 
+
 criar_banco()
 
 
@@ -84,7 +87,6 @@ def produtos_dados():
                                         variable=check_var,
                                         command=lambda: ler_dados_produto_selecionado(check_var, scrollable_frame_editar) if check_var.get() else apagar_entradas_produto_desmarcado(scrollable_frame_editar))
         box.pack(pady=5, padx=10, fill="x")
-
 
 def produtos_dados_entrada():
     conexao = sqlite3.connect("dados.db")
@@ -138,18 +140,31 @@ def ler_dados_produto_selecionado(arg_item, arg_frame):
     else:
         pass
 
+#Configurando  botão cancelar
+
+
+
+#fim config botão cancelar
 
 def apagar_entradas_produto_desmarcado(arg_frame):
     if arg_frame == scrollable_frame_editar:
-        entrada_editar_nome_produto.delete(0,"end")
-        entrada_editar_preco.delete(0, "end")
-        caixa_editar_texto.delete(0.0, "end")
+        entrada_editar_nome_produto.delete(0,tk.END)
+        entrada_editar_preco.delete(0, tk.END)
+        caixa_editar_texto.delete("1.0", tk.END)
+
+        #Desmarca o checkbox
+        for wigets_edit in scrollable_frame_editar.winfo_children():
+            if isinstance(wigets_edit, customtkinter.CTkCheckBox):
+                wigets_edit.deselect()
+
+
     elif arg_frame == scrollable_frame_entrada:
-        entrada_nome_quantidade.delete(0, "end")
+        entrada_nome_quantidade.delete(0, tk.END)
     elif arg_frame == scrollable_frame_saida:
-        entrada_nome_qtde.delete(0, "end")
+        entrada_nome_qtde.delete(0, tk.END)
     else:
         pass
+
 
 def excluir_dados_produto_selecionado(bessa):
     conexao = sqlite3.connect("dados.db")
@@ -461,7 +476,7 @@ botao_editar_excluir = customtkinter.CTkButton(frame_editar, text="🗑️Exclui
                                                hover_color="#2f394a", command=lambda : excluir_dados_produto_selecionado(entrada_editar_nome_produto.get()))
 botao_editar_excluir.grid(row=5, column=1, padx=10, pady=10, sticky="w")
 
-botao_editar_cancelar = customtkinter.CTkButton(frame_editar, text="❌Cancelar", width=80, command=lambda : cancelar_dados_produto_selecionado())
+botao_editar_cancelar = customtkinter.CTkButton(frame_editar, text="❌Cancelar", width=80, command=lambda : apagar_entradas_produto_desmarcado(scrollable_frame_editar))
 botao_editar_cancelar.grid(row=5, column=2, padx=10, pady=10)
 
 botao_editar_salvar = customtkinter.CTkButton(frame_editar, text="✔Salvar", width=80)
