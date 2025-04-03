@@ -156,7 +156,7 @@ def apagar_entradas_produto_desmarcado(arg_frame):
         for wigets_edit in scrollable_frame_editar.winfo_children():
             if isinstance(wigets_edit, customtkinter.CTkCheckBox):
                 wigets_edit.deselect()
-                
+
 
     elif arg_frame == scrollable_frame_entrada:
         entrada_nome_quantidade.delete(0, tk.END)
