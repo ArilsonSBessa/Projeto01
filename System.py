@@ -5,6 +5,8 @@ from tkinter.messagebox import showinfo
 import random
 import sqlite3
 
+###
+
 # Definição de variáveis
 x = 0
 y = 0
@@ -31,8 +33,8 @@ def criar_banco():
     terminal_sql.execute("CREATE TABLE IF NOT EXISTS itens (nome text, preco decimal, descricao text)")
     conexao.commit()
     conexao.close()
-
-
+#dfgdfgf
+#cghghgh
 def limpar_campos_cadastro():
     entrada_cadastrar_nome_produto.delete(0, tk.END)
     entrada_cadastrar_preco.delete(0, tk.END)
