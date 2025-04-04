@@ -5,6 +5,8 @@ from tkinter.messagebox import showinfo
 import random
 import sqlite3
 
+###
+
 # Definição de variáveis
 x = 0
 y = 0
@@ -31,8 +33,8 @@ def criar_banco():
     terminal_sql.execute("CREATE TABLE IF NOT EXISTS itens (nome text, preco decimal, descricao text)")
     conexao.commit()
     conexao.close()
-
-
+#dfgdfgf
+#cghghgh
 def limpar_campos_cadastro():
     entrada_cadastrar_nome_produto.delete(0, tk.END)
     entrada_cadastrar_preco.delete(0, tk.END)
@@ -207,6 +209,118 @@ def cancelar_dados_produto_selecionado():
     entrada_cadastrar_preco.delete(0, tk.END)
     caixa_texto_cadastrar_descricao.delete('1.0', tk.END)
     produtos_dados()
+
+
+def adicionar_item_entrada():
+    nome_produto = entrada_nome_quantidade.get().strip()
+    qtde_adicionada = entrada_qtde_adicionada.get().strip()
+
+    if not nome_produto or not qtde_adicionada:
+        showinfo("Aviso", "Preencha todos os campos!")
+        return
+
+    try:
+        qtde = int(qtde_adicionada)
+        if qtde <= 0:
+            showinfo("Aviso", "A quantidade deve ser maior que zero!")
+            return
+    except ValueError:
+        showinfo("Aviso", "Quantidade inválida!")
+        return
+
+    # Adiciona o item à lista de entrada
+    item_texto = f"{nome_produto} - +{qtde} unidades"
+
+    # Verifica se já existe na lista para atualizar a quantidade
+    for child in frame_scroll3.winfo_children():
+        if isinstance(child, customtkinter.CTkLabel) and nome_produto in child.cget("text"):
+            existing_text = child.cget("text")
+            existing_qtde = int(existing_text.split("+")[1].split()[0])
+            new_qtde = existing_qtde + qtde
+            child.configure(text=f"{nome_produto} - +{new_qtde} unidades")
+            break
+    else:
+        # Se não existir, cria novo item
+        x = len(frame_scroll3.winfo_children()) // 2 + 1  # Divide por 2 porque temos label + botão para cada item
+
+        label = customtkinter.CTkLabel(frame_scroll3, text=item_texto)
+        label.grid(row=x, column=0, pady=5, padx=0)
+
+        botao_remover = customtkinter.CTkButton(frame_scroll3, text="🗑️", width=5,
+                                                command=lambda l=label, b=None: remover_item_entrada(l, b))
+        botao_remover.grid(row=x, column=3, columnspan=3, pady=5, padx=0)
+
+    # Limpa os campos
+    entrada_qtde_adicionada.delete(0, tk.END)
+
+def remover_item_entrada(label, botao):
+    label.destroy()
+    if botao:
+        botao.destroy()
+
+
+def adicionar_item_saida():
+    print("tst")
+    nome_produto = entrada_nome_qtde.get().strip()
+    qtde_adicionada = entrada_qtde_retirada.get().strip()
+
+    if not nome_produto or not qtde_adicionada:
+        showinfo("Aviso", "Preencha todos os campos!")
+        return
+
+    try:
+        qtde = int(qtde_adicionada)
+        if qtde <= 0:
+            showinfo("Aviso", "A quantidade deve ser maior que zero!")
+            return
+    except ValueError:
+        showinfo("Aviso", "Quantidade inválida!")
+        return
+
+    # Adiciona o item à lista de saida
+    item_texto = f"{nome_produto} - +{qtde} unidades"
+    print(item_texto)
+    # Verifica se já existe na lista para atualizar a quantidade
+    for child in frame_scroll4.winfo_children():
+        if isinstance(child, customtkinter.CTkLabel) and nome_produto in child.cget("text"):
+            existing_text = child.cget("text")
+            existing_qtde = int(existing_text.split("+")[1].split()[0])
+            new_qtde = existing_qtde + qtde
+            child.configure(text=f"{nome_produto} - +{new_qtde} unidades")
+            break
+    else:
+        # Se não existir, cria novo item
+        x = len(frame_scroll4.winfo_children()) // 2 + 1  # Divide por 2 porque temos label + botão para cada item
+
+        label = customtkinter.CTkLabel(frame_scroll4, text=item_texto)
+        label.grid(row=x, column=0, pady=5, padx=0)
+
+        botao_remover = customtkinter.CTkButton(frame_scroll4, text="🗑️", width=5,
+                                                command=lambda l=label, b=None: remover_item_saida(l, b))
+        botao_remover.grid(row=x, column=3, columnspan=3, pady=5, padx=0)
+
+    # Limpa os campos
+    entrada_qtde_retirada.delete(0, tk.END)
+
+def remover_item_saida(label, botao):
+    label.destroy()
+    if botao:
+        botao.destroy()
+
+
+
+def salvar_entrada():
+    # Implemente a lógica para salvar no banco de dados
+    showinfo("Sucesso", "Entrada de produtos salva com sucesso!")
+
+    # Limpa a lista após salvar
+    for child in frame_scroll3.winfo_children():
+        child.destroy()
+
+    # Limpa os campos
+    entrada_nome_quantidade.delete(0, tk.END)
+    entrada_qtde_adicionada.delete(0, tk.END)
+
 
 # função abrir
 def abrir_frame_cadastrar():
@@ -506,18 +620,18 @@ scrollable_frame_saida.grid(row=3, column=0, padx=10, pady=5, sticky="w", rowspa
 
 # configurando a lixeira
 
-frame_scroll3 = customtkinter.CTkScrollableFrame(frame_saida, width=300, height=80)
-frame_scroll3.grid_columnconfigure(2, weight=1)
-frame_scroll3.grid(row=3, column=1, padx=10, pady=5, stick="w", columnspan=2)
-items = ["Produto 1", "Produto 2", "Produto 3", "Produto 4"]
+frame_scroll4 = customtkinter.CTkScrollableFrame(frame_saida, width=300, height=80)
+frame_scroll4.grid_columnconfigure(2, weight=1)
+frame_scroll4.grid(row=3, column=1, padx=10, pady=5, stick="w", columnspan=2)
+items = []
 for i in items:
     x += 1
-    box = customtkinter.CTkLabel(frame_scroll3, text=i)
+    box = customtkinter.CTkLabel(frame_scroll4, text=i)
     box.grid(row=x, column=0, pady=5, padx=0)
 x = 0
 for i in items:
     y += 1
-    box = customtkinter.CTkButton(frame_scroll3, text="🗑️", width=5)
+    box = customtkinter.CTkButton(frame_scroll4, text="🗑️", width=5)
     box.grid(row=y, column=3, columnspan=3, pady=5, padx=0)
 y = 0
 
@@ -539,20 +653,28 @@ botao_cancelar.grid(row=5, column=1, padx=10, pady=10, stick="w")
 botao_salvar = customtkinter.CTkButton(frame_saida, text="☑Salvar", width=80)
 botao_salvar.grid(row=5, column=2, padx=10, pady=10, columnspan=2, sticky="e")
 
-botao_adicionar_item = customtkinter.CTkButton(frame_saida, text="➕Adicionar item", width=120)
+botao_adicionar_item = customtkinter.CTkButton(frame_saida, text="➕Adicionar item", width=120, command=adicionar_item_saida)
 botao_adicionar_item.grid(row=2, column=1, padx=10, pady=0, columnspan=2, sticky="e")
+
+# adicionando produto frame saida
+
+
 
 # widget frame_entrada
 
 scrollable_frame_entrada = customtkinter.CTkScrollableFrame(frame_entrada)
 scrollable_frame_entrada.grid(row=3, column=0, padx=10, pady=5, sticky="w", rowspan=2)
 
+
+# Adicionar estas funções para gerenciar a entrada de produtos
+
+
 # adicionando produto
 
 frame_scroll3 = customtkinter.CTkScrollableFrame(frame_entrada, width=300, height=80)
 frame_scroll3.grid_columnconfigure(2, weight=1)
 frame_scroll3.grid(row=3, column=1, padx=10, pady=5, stick="w", columnspan=2)
-items = ["Produto 1", "Produto 2", "Produto 3", "Produto 4"]
+items = []
 for i in items:
     x += 1
     box = customtkinter.CTkLabel(frame_scroll3, text=i)
@@ -576,14 +698,20 @@ entrada_nome_quantidade.grid(row=1, column=1, padx=10, pady=20, columnspan=2)
 entrada_buscar = customtkinter.CTkEntry(frame_entrada, width=220, placeholder_text="Buscar")
 entrada_buscar.grid(row=1, column=0, padx=10, sticky="w", columnspan=2)
 
+# Substitua estas linhas no frame_entrada:
+botao_adicionar_item_entrada = customtkinter.CTkButton(frame_entrada, text="➕Adicionar item", width=120,
+                                                     command=adicionar_item_entrada)
+botao_adicionar_item_entrada.grid(row=2, column=1, padx=10, pady=0, columnspan=2, sticky="e")
+
+botao_salvar_entrada = customtkinter.CTkButton(frame_entrada, text="☑Salvar", width=80,
+                                             command=salvar_entrada)
+botao_salvar_entrada.grid(row=5, column=2, padx=10, pady=10, columnspan=2, sticky="e")
+
+
 botao_cancelar_entrada = customtkinter.CTkButton(frame_entrada, text="❌Cancelar", fg_color="Red", width=80, command=lambda : apagar_entradas_produto_desmarcado(scrollable_frame_entrada))
 botao_cancelar_entrada.grid(row=5, column=1, padx=10, pady=10, stick="w")
 
-botao_salvar_entrada = customtkinter.CTkButton(frame_entrada, text="☑Salvar", width=80)
-botao_salvar_entrada.grid(row=5, column=2, padx=10, pady=10, columnspan=2, sticky="e")
 
-botao_adicionar_item_entrada = customtkinter.CTkButton(frame_entrada, text="➕Adicionar item", width=120)
-botao_adicionar_item_entrada.grid(row=2, column=1, padx=10, pady=0, columnspan=2, sticky="e")
 
 # widget frame_relatorio - inicio
 
