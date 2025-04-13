@@ -5,36 +5,34 @@ from tkinter.messagebox import showinfo
 import random
 import sqlite3
 
-###
+# Adicione esta linha no início do arquivo com os outros imports
+from datetime import datetime
 
 # Definição de variáveis
 x = 0
 y = 0
 
-#definição do git
 
-# importando a tabela
-
-aleatorio = []
-aleatorio2 = []
-aleatorio3 = []
-aleatoriors = []
-
-for i in range(1, 101):
-    aleatorio.append(random.randint(1, 1000))
-    aleatorio2.append(random.randint(1, 1000))
-    aleatorio3.append(random.randint(1, 1000))
-    aleatoriors.append(random.randint(1, 1000))
+# Lista para armazenar os produtos e quantidades de saída
+saida_produtos = []
 
 
 def criar_banco():
     conexao = sqlite3.connect("dados.db")
     terminal_sql = conexao.cursor()
     terminal_sql.execute("CREATE TABLE IF NOT EXISTS itens (nome text, preco decimal, descricao text)")
+    terminal_sql.execute("""CREATE TABLE IF NOT EXISTS saidas (
+                               id INTEGER PRIMARY KEY AUTOINCREMENT,
+                               nome_produto text,
+                               quantidade integer,
+                               data_hora text,
+                               FOREIGN KEY(nome_produto) REFERENCES itens(nome)
+                           )""")
+
     conexao.commit()
     conexao.close()
-#dfgdfgf
-#cghghgh
+
+
 def limpar_campos_cadastro():
     entrada_cadastrar_nome_produto.delete(0, tk.END)
     entrada_cadastrar_preco.delete(0, tk.END)
@@ -138,7 +136,7 @@ def ler_dados_produto_selecionado(arg_item, arg_frame):
     elif arg_frame == scrollable_frame_entrada:
         entrada_nome_quantidade.insert(0, dados_produto[0][0])
     elif arg_frame == scrollable_frame_saida:
-        entrada_nome_qtde.insert(0, dados_produto[0][0])
+        entrada_nome_qtde_saida.insert(0, dados_produto[0][0])
     else:
         pass
 
@@ -165,7 +163,7 @@ def apagar_entradas_produto_desmarcado(arg_frame):
 
     elif arg_frame == scrollable_frame_saida:
         entrada_qtde_retirada.delete(0, tk.END)
-        entrada_nome_qtde.delete(0, tk.END)
+        entrada_nome_qtde_saida.delete(0, tk.END)
         for wigets_edit in scrollable_frame_saida.winfo_children():
             if isinstance(wigets_edit, customtkinter.CTkCheckBox):
                 wigets_edit.deselect()
@@ -228,8 +226,8 @@ def adicionar_item_entrada():
         showinfo("Aviso", "Quantidade inválida!")
         return
 
-    # Adiciona o item à lista de entrada
-    item_texto = f"{nome_produto} - +{qtde} unidades"
+    # Create the item_texto variable here
+    item_texto = f"{nome_produto} - + {qtde} unidades"
 
     # Verifica se já existe na lista para atualizar a quantidade
     for child in frame_scroll3.winfo_children():
@@ -260,16 +258,16 @@ def remover_item_entrada(label, botao):
 
 
 def adicionar_item_saida():
-    print("tst")
-    nome_produto = entrada_nome_qtde.get().strip()
-    qtde_adicionada = entrada_qtde_retirada.get().strip()
+    global saida_produtos
+    nome_produto = entrada_nome_qtde_saida.get().strip()
+    qtde_retirada = entrada_qtde_retirada.get().strip()
 
-    if not nome_produto or not qtde_adicionada:
+    if not nome_produto or not qtde_retirada:
         showinfo("Aviso", "Preencha todos os campos!")
         return
 
     try:
-        qtde = int(qtde_adicionada)
+        qtde = int(qtde_retirada)
         if qtde <= 0:
             showinfo("Aviso", "A quantidade deve ser maior que zero!")
             return
@@ -277,9 +275,185 @@ def adicionar_item_saida():
         showinfo("Aviso", "Quantidade inválida!")
         return
 
-    # Adiciona o item à lista de saida
-    item_texto = f"{nome_produto} - +{qtde} unidades"
-    print(item_texto)
+    # Verifica se o produto existe no banco de dados
+    conexao = sqlite3.connect("dados.db")
+    terminal_sql = conexao.cursor()
+    terminal_sql.execute("SELECT nome FROM itens WHERE nome = ?", (nome_produto,))
+    if not terminal_sql.fetchone():
+        showinfo("Erro", f"Produto '{nome_produto}' não cadastrado!")
+        conexao.close()
+        return
+    conexao.close()
+
+    # Adiciona o produto à lista de saída
+    saida_produtos.append({
+        'nome': nome_produto,
+        'quantidade': qtde
+    })
+
+    # Atualiza a interface
+    atualizar_lista_saida()
+
+    # Limpa os campos
+    entrada_qtde_retirada.delete(0, tk.END)
+
+
+def atualizar_lista_saida():
+    # Limpa todos os widgets do frame_scroll4
+    for widget in frame_scroll4.winfo_children():
+        widget.destroy()
+
+    # Adiciona cada item do vetor à interface
+    for i, item in enumerate(saida_produtos):
+        # Cria o texto do label com os dados do item atual
+        item_texto = f"{item['nome']} - -{item['quantidade']} unidades"
+
+        label = customtkinter.CTkLabel(frame_scroll4, text=item_texto)
+        label.grid(row=i, column=0, pady=5, padx=0, sticky="w")
+
+        botao_remover = customtkinter.CTkButton(
+            frame_scroll4,
+            text="🗑️",
+            width=5,
+            command=lambda idx=i: remover_item_saida(idx)
+        )
+        botao_remover.grid(row=i, column=1, pady=5, padx=5)
+
+
+
+# Modifique a função remover_item_saida para trabalhar com o vetor
+
+
+def remover_item_saida(indice):
+    global saida_produtos
+    try:
+        if 0 <= indice < len(saida_produtos):
+            saida_produtos.pop(indice)
+            atualizar_lista_saida()
+    except Exception as e:
+        showinfo("Erro", f"Não foi possível remover o item: {str(e)}")
+
+
+
+    # Coletar todos os itens da lista de saída
+    itens_saida = []
+    for child in frame_scroll4.winfo_children():
+        if isinstance(child, customtkinter.CTkLabel):
+            texto = child.cget("text")
+            partes = texto.split(" - -")
+            nome = partes[0]
+            quantidade = int(partes[1].split()[0])
+            itens_saida.append((nome, quantidade))
+
+        if not itens_saida:
+            showinfo("Aviso", "Nenhum item para salvar!")
+            return
+
+        try:
+            conexao = sqlite3.connect("dados.db")
+            terminal_sql = conexao.cursor()
+            data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+            for nome, quantidade in itens_saida:
+                # Verifica se o produto existe
+                terminal_sql.execute("SELECT nome FROM itens WHERE nome = ?", (nome,))
+                if not terminal_sql.fetchone():
+                    showinfo("Erro", f"Produto '{nome}' não cadastrado!")
+                    continue
+
+                    # Insere no banco de dados
+                    terminal_sql.execute(
+                        "INSERT INTO saidas (nome_produto, quantidade, data_hora) VALUES (?, ?, ?)",
+                        (nome, quantidade, data_hora)
+                    )
+
+                conexao.commit()
+                showinfo("Sucesso", "Saída de produtos salva com sucesso!")
+
+                # Limpa a lista de saída
+                for child in frame_scroll4.winfo_children():
+                    child.destroy()
+
+        except Exception as e:
+            conexao.rollback()
+            showinfo("Erro", f"Ocorreu um erro ao salvar: {str(e)}")
+        finally:
+            conexao.close()
+
+
+# Atualize a função do botão salvar na tela de saída
+def salvar_saida():
+    global saida_produtos
+
+    if not saida_produtos:
+        showinfo("Aviso", "Nenhum produto para salvar!")
+        return
+
+    try:
+        conexao = sqlite3.connect("dados.db")
+        terminal_sql = conexao.cursor()
+        data_hora = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+        for produto in saida_produtos:
+            # Verifica se o produto existe
+            terminal_sql.execute("SELECT nome FROM itens WHERE nome = ?", (produto['nome'],))
+            if not terminal_sql.fetchone():
+                showinfo("Erro", f"Produto '{produto['nome']}' não cadastrado!")
+                continue
+
+            # Insere no banco de dados (você precisará criar uma tabela de saídas)
+            terminal_sql.execute(
+            "INSERT INTO saidas (nome_produto, quantidade, data_hora) VALUES (?, ?, ?)",
+                (produto['nome'], produto['quantidade'], data_hora)
+            )
+
+        conexao.commit()
+        showinfo("Sucesso", "Saída de produtos salva com sucesso!")
+
+        # Limpa o vetor e a interface
+        saida_produtos = []
+        atualizar_lista_saida()
+        entrada_nome_qtde_saida.delete(0, tk.END)
+        entrada_qtde_retirada.delete(0, tk.END)
+
+    except Exception as e:
+        conexao.rollback()
+        showinfo("Erro", f"Ocorreu um erro ao salvar: {str(e)}")
+
+    finally:
+        if 'conexao' in locals():
+            conexao.close()
+
+# Adicione esta função para carregar as saídas no relatório
+def carregar_saidas():
+    try:
+        conexao = sqlite3.connect("dados.db")
+        terminal_sql = conexao.cursor()
+
+        # Limpa a tabela
+        for item in tree_saida.get_children():
+            tree_saida.delete(item)
+
+        # Busca as saídas no banco de dados
+        terminal_sql.execute("""
+                SELECT nome_produto, quantidade, data_hora 
+                FROM saidas 
+                ORDER BY data_hora DESC
+            """)
+        saidas = terminal_sql.fetchall()
+
+        # Preenche a tabela com os dados
+        for saida in saidas:
+            # Formata a quantidade para exibir com sinal negativo (saída)
+            quantidade_formatada = f"-{saida[1]}"
+            tree_saida.insert('', tk.END, values=(saida[0], quantidade_formatada, saida[2]))
+
+    except sqlite3.Error as e:
+        showinfo("Erro", f"Erro ao carregar saídas: {str(e)}")
+    finally:
+        if 'conexao' in locals():
+            conexao.close()
+'''
     # Verifica se já existe na lista para atualizar a quantidade
     for child in frame_scroll4.winfo_children():
         if isinstance(child, customtkinter.CTkLabel) and nome_produto in child.cget("text"):
@@ -290,24 +464,23 @@ def adicionar_item_saida():
             break
     else:
         # Se não existir, cria novo item
-        x = len(frame_scroll4.winfo_children()) // 2 + 1  # Divide por 2 porque temos label + botão para cada item
+        x = len(frame_scroll4.winfo_children()) // 2 + 1
+        item_texto = f"{nome_produto} += {qtde} unidades"  # Definindo o texto do item
 
-        label = customtkinter.CTkLabel(frame_scroll4, text=item_texto)
+        label = customtkinter.CTkLabel(frame_scroll4, text=item_text)
         label.grid(row=x, column=0, pady=5, padx=0)
 
-        botao_remover = customtkinter.CTkButton(frame_scroll4, text="🗑️", width=5,
-                                                command=lambda l=label, b=None: remover_item_saida(l, b))
+        botao_remover = customtkinter.CTkButton(
+            frame_scroll4,
+            text="🗑️",
+            width=5,
+            command=lambda l=label, b=None: remover_item_saida(l, b) if 'l' in locals() else None
+        )
         botao_remover.grid(row=x, column=3, columnspan=3, pady=5, padx=0)
 
     # Limpa os campos
     entrada_qtde_retirada.delete(0, tk.END)
-
-def remover_item_saida(label, botao):
-    label.destroy()
-    if botao:
-        botao.destroy()
-
-
+'''
 
 def salvar_entrada():
     # Implemente a lógica para salvar no banco de dados
@@ -363,8 +536,6 @@ def abrir_frame_saida():
     frame_saida.grid_propagate(False)
     frame_saida.grid(row=0, column=1, padx=5, pady=5)
     produtos_dados_saida()
-
-
 
 def abrir_frame_entrada():
     # fecha frame
@@ -423,12 +594,11 @@ def abrir_frame_relatorio_saida():
     # abre frame
     frame_relatorio_saida.grid_propagate(False)
     frame_relatorio_saida.grid(row=0, column=1, padx=5, pady=5)
-
-
+    #carrega dados
+    carregar_saidas()
 
 
 popup = None
-
 
 def abrir_popup():
     global popup
@@ -641,8 +811,8 @@ texto_saida_produto.grid(row=0, column=1, padx=10, columnspan=2)
 entrada_qtde_retirada = customtkinter.CTkEntry(frame_saida, width=120, placeholder_text="Qtde a ser retirada")
 entrada_qtde_retirada.grid(row=2, column=1, padx=10, pady=0, sticky="w", columnspan=2)
 
-entrada_nome_qtde = customtkinter.CTkEntry(frame_saida, width=320, placeholder_text="Nome e Qtde")
-entrada_nome_qtde.grid(row=1, column=1, padx=10, pady=20, columnspan=2)
+entrada_nome_qtde_saida = customtkinter.CTkEntry(frame_saida, width=320, placeholder_text="Nome e Qtde")
+entrada_nome_qtde_saida.grid(row=1, column=1, padx=10, pady=20, columnspan=2)
 
 entrada_nome_buscar = customtkinter.CTkEntry(frame_saida, width=220, placeholder_text="Buscar")
 entrada_nome_buscar.grid(row=1, column=0, padx=10, sticky="w", columnspan=2)
@@ -650,11 +820,12 @@ entrada_nome_buscar.grid(row=1, column=0, padx=10, sticky="w", columnspan=2)
 botao_cancelar = customtkinter.CTkButton(frame_saida, text="❌Cancelar", fg_color="Red", width=80, command=lambda : apagar_entradas_produto_desmarcado(scrollable_frame_saida))
 botao_cancelar.grid(row=5, column=1, padx=10, pady=10, stick="w")
 
-botao_salvar = customtkinter.CTkButton(frame_saida, text="☑Salvar", width=80)
+botao_salvar = customtkinter.CTkButton(frame_saida, text="☑Salvar", width=80, command=salvar_saida)
 botao_salvar.grid(row=5, column=2, padx=10, pady=10, columnspan=2, sticky="e")
 
-botao_adicionar_item = customtkinter.CTkButton(frame_saida, text="➕Adicionar item", width=120, command=adicionar_item_saida)
-botao_adicionar_item.grid(row=2, column=1, padx=10, pady=0, columnspan=2, sticky="e")
+
+botao_adicionar_item_saida = customtkinter.CTkButton(frame_saida, text="➕Adicionar item", width=120, command=adicionar_item_saida)
+botao_adicionar_item_saida.grid(row=2, column=1, padx=10, pady=0, columnspan=2, sticky="e")
 
 # adicionando produto frame saida
 
@@ -797,13 +968,6 @@ tree_entrada.column('Nome', width=184)
 tree_entrada.column('Quantidade', width=182)
 tree_entrada.column('Data/hora', width=184)
 
-# generate sample data
-contacts = []
-for n in range(1, 100):
-    contacts.append((f'item {n}', f'{aleatorio[n]}', f'28/02/2025'))
-# add data to the treeview
-for contact in contacts:
-    tree_entrada.insert('', tk.END, values=contact)
 
 tree_entrada.grid(row=2, column=0, padx=0, pady=10, columnspan=4)
 # tree.grid(row=0, column=0, sticky='nsew')
@@ -854,14 +1018,6 @@ tree_saida.heading('Data/hora', text='Data/hora')
 tree_saida.column('Nome', width=184)
 tree_saida.column('Quantidade', width=182)
 tree_saida.column('Data/hora', width=184)
-
-# generate sample data
-contacts = []
-for n in range(1, 100):
-    contacts.append((f'first {n}', f'{aleatorio2[n]}', f'email{n}@example.com'))
-# add data to the treeview
-for contact in contacts:
-    tree_saida.insert('', tk.END, values=contact)
 
 tree_saida.grid(row=2, column=0, padx=0, pady=10, columnspan=4)
 
